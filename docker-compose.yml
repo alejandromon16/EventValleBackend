@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:10
+    container_name: postgres_event
+    restart: always
+    environment:
+      - POSTGRES_USER=alm1
+      - POSTGRES_PASSWORD=12345678
+      - POSTGRES_DB=event2
+    ports:
+      - 5435:5432
+    volumes:
+      - db:/var/lib/postgresql/data
+  redis:
+    image: 'bitnami/redis:latest'
+    container_name: redis_event
+    restart: always
+    ports:
+      - '6378:6378'
+    command: redis-server --save '' --appendonly no --loglevel warning --protected-mode no
+    volumes:
+      - cache:/data
+
+volumes:
+  db:
+    driver: local
+  cache:
+    driver: local

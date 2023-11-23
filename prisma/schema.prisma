@@ -1,0 +1,137 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id        String   @id
+  sid       String   @unique
+  data      String
+  expiresAt DateTime
+}
+
+enum RoleType {
+  SUPER_ADMIN
+  ADMIN
+  CONTENT_APPROVER
+  CONTENT_PUBLISHER
+  REQUEST_APPROVER
+  CONTENT_VISULIZER
+  MARKETING
+  USER
+}
+
+model User {
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  name         String
+  last_name    String
+  phone_number String?
+  user_name    String   @unique
+  email        String   @unique
+  password     String
+  roles        Role[]
+
+  notificationPreference NotificationPreference?
+  approvedRequested      RequestEvent[]          @relation("approvedBy")
+  eventsRequested        RequestEvent[]          @relation("requestedBy")
+  PasswordResetToken     PasswordResetToken[]
+  eventPublished         Event[]                 @relation("publishedBy")
+  likedEvents            Event[]                 @relation("UserlikedEvents")
+  savedEvents            Event[]                 @relation("UserSavedEvents")
+}
+
+model NotificationPreference {
+  id       String   @id @default(uuid())
+  email    Boolean? @default(true)
+  whatsapp Boolean? @default(false)
+  userId   String   @unique
+  user     User     @relation(fields: [userId], references: [id])
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        RoleType @unique @default(USER)
+  description String
+  users       User[]
+}
+
+model PasswordResetToken {
+  id              Int      @id @default(autoincrement())
+  token           String
+  expiration_date DateTime
+  deactivated     Boolean  @default(false)
+  user            User     @relation(fields: [userId], references: [id])
+  userId          String
+}
+
+enum RequestEventStatus {
+  APPROVED
+  REJECTED
+  PENDING
+}
+
+model RequestEvent {
+  id            String             @id @default(uuid())
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  title         String             @default("Test Title")
+  subtitle       String
+  description    String
+  startDate      DateTime
+  endDate        DateTime?
+  locationName   String
+  locationDetail String?
+  address        String
+
+  requestedById String
+  requestedBy   User               @relation(name: "requestedBy", fields: [requestedById], references: [id])
+  approvedById  String?
+  approvedBy    User?              @relation(name: "approvedBy", fields: [approvedById], references: [id])
+  status        RequestEventStatus @default(PENDING)
+
+  Event Event?
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISH
+}
+
+model Event {
+  id             String    @id @default(uuid())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  title          String
+  subtitle       String
+  description    String
+  principalImage String
+  images         String[]
+  tags           String[]
+  startDate      DateTime
+  endDate        DateTime?
+  locationName   String
+  locationDetail String?
+  address        String
+
+  //optional
+  longitud Float?
+  latitud  Float?
+
+  status EventStatus @default(DRAFT)
+
+  publishedById  String?
+  publishedBy    User?         @relation(name: "publishedBy", fields: [publishedById], references: [id])
+  requestEventId String        @unique
+  requestEvent   RequestEvent? @relation(fields: [requestEventId], references: [id])
+  likedBy        User[]        @relation(name: "UserlikedEvents")
+  savedBy        User[]        @relation(name: "UserSavedEvents")
+}
