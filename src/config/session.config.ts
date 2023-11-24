@@ -29,7 +29,7 @@ const store = new RedisStore({
 });
 
 export const redisSession = session({
-  secret: process.env['SESSION_SECRET'],
+  secret: 'secretkey',
   resave: false,
   saveUninitialized: true,
   cookie: {
