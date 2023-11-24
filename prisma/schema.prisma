@@ -3,12 +3,11 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "./generated/client"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = "postgresql://postgres:Jc6b1WjEuG7hXUXA@db.qvrsfuapjwfzhyftnetm.supabase.co:5432/postgres"
 }
 
 model Session {
