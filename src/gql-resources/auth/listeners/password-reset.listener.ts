@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable, Logger } from '@nestjs/common';
 import { EmailService } from '../../../common/services';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -12,17 +13,15 @@ export class PasswordResetListener {
 
   @OnEvent(AUTH_EVENTS.requestPasswordReset)
   async sendPasswordResetEmail(payload: RequestPasswordResetEvent) {
-    const baseUrl =
-      process.env.NODE_ENV === 'development'
-        ? 'http://localhost:4200'
-        : 'https://office.travell.app';
-
+    // const baseUrl =
+    //   process.env.NODE_ENV === 'development'
+    //     ? 'http://localhost:4200'
+    //     : 'https://office.travell.app';
     // const html = await renderEmailTemplate('resetPassword', {
     //   requestedByEmail: payload.requestedByUser.email,
     //   // TODO: Replace with actual email
     //   resetPasswordUrl: `${baseUrl}/reset?token=${payload.token}&user_id=${payload.requestedByUser.id}`,
     // });
-
     // await this.emailService.sendEmail(
     //   payload.requestedByUser.email,
     //   'Password reset request',
