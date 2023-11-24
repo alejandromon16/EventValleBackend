@@ -3,11 +3,12 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "./generated/client"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = "postgres://koyeb-adm:u4pxInafdwX6@ep-broken-hill-69818663.eu-central-1.aws.neon.tech/koyebdb"
+  url      = env("DATABASE_URL")
 }
 
 model Session {
