@@ -16,7 +16,7 @@ import { ResetPasswordInput } from './dto/reset-password.input';
 import { ValidatePasswordResetTokenInput } from './dto/validate-password-reset-token.input';
 import { LogoutEntity, MeEntity } from './entities/auth.entity';
 import { ValidatePasswordResetTokenEntity } from './entities/validate-password-reset-token.entity';
-import { Request } from 'express';
+import { Request, Response, response } from 'express';
 import { SessionLocalAuthGuard } from './guards/local-auth.guard';
 import { GQLAuthGuard } from './guards/gql-auth.guard';
 import { IsAuthenticated } from './guards/authenticated.guard';
@@ -31,7 +31,7 @@ export class AuthResolver {
     @Args('loginInput') loginInput: LoginInput,
     @Context('req') request: any,
   ) {
-    console.log('mutation', request.session);
+    console.log('this is the sessionid', request.session.id);
     const user = await this.authService.login(loginInput);
     return user;
   }
@@ -71,10 +71,15 @@ export class AuthResolver {
     return result;
   }
 
-  @Query(() => LogoutEntity)
+  @Mutation(() => LogoutEntity)
   @UseGuards(IsAuthenticated)
   async logout(@Context('req') request: Request) {
-    request.session.destroy(console.error);
+    request.session.destroy((err) => {
+      if (err) {
+        console.log('Error destroying session', err);
+        return { status: 'Error' };
+      }
+    });
 
     return { status: 'Success' };
   }

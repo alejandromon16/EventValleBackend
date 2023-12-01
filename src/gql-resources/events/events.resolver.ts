@@ -1,9 +1,14 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+/* eslint-disable prettier/prettier */
+import { Args, Context, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import {
   CreateEventInput,
+  GetEventByIdInput,
   GetListByRequesterIdInput,
+  GetListOfEventByUserIdInput,
+  UpdateEventInput,
 } from './dto/create-event.input';
 import { LikedEventInput } from './dto/liked-event.input';
+import { PublishEventInput } from './dto/publish-event.input';
 import { SaveEventInput } from './dto/save-event.input';
 import { EventEntity } from './entities/event.entity';
 import { EventsService } from './events.service';
@@ -13,7 +18,8 @@ export class EventsResolver {
   constructor(private readonly eventsService: EventsService) {}
 
   @Query(() => [EventEntity])
-  getListOfEvents() {
+  getListOfEvents(@Context('req') request: any) {
+    console.log('query list Events', request.session.id);
     return this.eventsService.list();
   }
 
@@ -35,6 +41,38 @@ export class EventsResolver {
     return this.eventsService.getListByRequesterId(
       getListOfEventsByRequesterId,
     );
+  }
+
+  @Query(() => [EventEntity])
+  getListOfEventSavedByUserId(@Args('getListOfEventsSavedByUserIdInput')getListOfEventsSavedByUserIdInput: GetListOfEventByUserIdInput ){
+    return this.eventsService.getListOfEventsSavedByUserId(getListOfEventsSavedByUserIdInput);
+  }
+
+  @Query(() => Int)
+  getAmountOfPublishEvents(@Context('req') request: any){
+    console.log('query', request.session.id);
+    return this.eventsService.getAmountOfPublishEvents();
+  }
+
+  @Query(() => Int)
+  getAmountOfDraftEvents(@Context('req') request: any){
+    console.log('query', request.session.id);
+    return this.eventsService.getAmountOfDraftEvents();
+  }
+
+  @Mutation(() => EventEntity)
+  updateEvent(@Args('updateEventInput') updateEventInput: UpdateEventInput) {
+    return this.eventsService.updateEventById(updateEventInput);
+  }
+
+  @Mutation(() => EventEntity)
+  publishEvent(@Args('publishEventInput') publishEventInput: PublishEventInput) {
+    return this.eventsService.publish(publishEventInput);
+  }
+
+  @Mutation(() => EventEntity)
+  UnPublishEvent(@Args('publishEventInput') publishEventInput: PublishEventInput) {
+    return this.eventsService.publish(publishEventInput);
   }
 
   @Mutation(() => EventEntity)
@@ -60,5 +98,12 @@ export class EventsResolver {
   @Mutation(() => EventEntity)
   unSaveEventByUser(@Args('saveEventInput') saveEventInput: SaveEventInput) {
     return this.eventsService.unSaveEventByUser(saveEventInput);
+  }
+
+  @Query(() => EventEntity)
+  getEventById(
+    @Args('getEventByIdInput') getEventByIdInput: GetEventByIdInput,
+  ) {
+    return this.eventsService.getEventById(getEventByIdInput);
   }
 }

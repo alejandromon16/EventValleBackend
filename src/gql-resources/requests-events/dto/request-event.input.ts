@@ -52,3 +52,12 @@ export class GetRequestEventByIdInput {
   @Field(() => String)
   requestEventId?: string;
 }
+
+@InputType()
+export class ApproveRequestEventInput {
+  @Field(() => String)
+  requestEventId?: string;
+
+  @Field(() => String)
+  approverId?: string;
+}

@@ -1,4 +1,4 @@
-import { Field, Float, InputType } from '@nestjs/graphql';
+import { Field, Float, InputType, PartialType } from '@nestjs/graphql';
 import { EventStatus, Prisma } from '@prisma/client';
 import { IsOptional } from 'class-validator';
 
@@ -59,4 +59,22 @@ export class CreateEventInput
 export class GetListByRequesterIdInput {
   @Field(() => String)
   requesterId: string;
+}
+
+@InputType()
+export class GetEventByIdInput {
+  @Field(() => String)
+  eventId: string;
+}
+
+@InputType()
+export class UpdateEventInput extends PartialType(CreateEventInput) {
+  @Field(() => String)
+  eventId: string;
+}
+
+@InputType()
+export class GetListOfEventByUserIdInput {
+  @Field(() => String)
+  userId: string;
 }

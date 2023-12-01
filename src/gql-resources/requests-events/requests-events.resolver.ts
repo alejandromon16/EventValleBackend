@@ -1,5 +1,6 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import {
+  ApproveRequestEventInput,
   CreateRequestEventInput,
   GetRequestEventByIdInput,
 } from './dto/request-event.input';
@@ -20,7 +21,8 @@ export class RequestsEventsResolver {
   }
 
   @Query(() => [RequestEventEntity])
-  getListOfRequestsEvents() {
+  getListOfRequestsEvents(@Context('req') request: any) {
+    console.log('query list request', request.session.id);
     return this.requestEventService.getList();
   }
 
@@ -37,5 +39,25 @@ export class RequestsEventsResolver {
     @Args('getRequestEventById') getRequestEventById: GetRequestEventByIdInput,
   ) {
     return this.requestEventService.getById(getRequestEventById);
+  }
+
+  @Mutation(() => RequestEventEntity)
+  approveRequestEvent(
+    @Args('approveRequestEventInput')
+    approveRequestEventInput: ApproveRequestEventInput,
+  ) {
+    return this.requestEventService.approveRequestEvent(
+      approveRequestEventInput,
+    );
+  }
+
+  @Mutation(() => RequestEventEntity)
+  rejectRequestEvent(
+    @Args('approveRequestEventInput')
+    approveRequestEventInput: ApproveRequestEventInput,
+  ) {
+    return this.requestEventService.rejectRequestEvent(
+      approveRequestEventInput,
+    );
   }
 }

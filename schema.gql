@@ -2,6 +2,11 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input ApproveRequestEventInput {
+  approverId: String!
+  requestEventId: String!
+}
+
 input AssignRolesToUserInput {
   roles: [RoleType!]!
   userId: String!
@@ -84,6 +89,10 @@ input FindRoleByNameInput {
   name: RoleType!
 }
 
+input GetEventByIdInput {
+  eventId: String!
+}
+
 input GetListByRequesterIdInput {
   requesterId: String!
 }
@@ -120,25 +129,39 @@ type MeEntity {
 }
 
 type Mutation {
+  UnPublishEvent(publishEventInput: PublishEventInput!): EventEntity!
   addLike(likedEventInput: LikedEventInput!): EventEntity!
+  approveRequestEvent(approveRequestEventInput: ApproveRequestEventInput!): RequestEventEntity!
   assignRolesToUser(assignRolesToUser: AssignRolesToUserInput!): UserEntity!
   createEvent(createEventInput: CreateEventInput!): EventEntity!
   createRequestEvent(createRequestEventInput: CreateRequestEventInput!): RequestEventEntity!
   createRole(createRoleInput: CreateRoleInput!): RoleEntity!
   createUser(createUserInput: CreateUserInput!): UserEntity!
   login(loginInput: LoginInput!): UserEntity!
+  logout: LogoutEntity!
+  publishEvent(publishEventInput: PublishEventInput!): EventEntity!
+  rejectRequestEvent(approveRequestEventInput: ApproveRequestEventInput!): RequestEventEntity!
   removeLike(likedEventInput: LikedEventInput!): EventEntity!
   removeUser(id: String!): UserEntity!
   requestPasswordReset(requestPasswordResetInput: RequestPasswordResetInput!): UserEntity!
   resetPassword(resetPasswordInput: ResetPasswordInput!): UserEntity!
   saveEventByUser(saveEventInput: SaveEventInput!): EventEntity!
   unSaveEventByUser(saveEventInput: SaveEventInput!): EventEntity!
+  updateEvent(updateEventInput: UpdateEventInput!): EventEntity!
   updateUser(updateUserInput: UpdateUserInput!): UserEntity!
   validatePasswordResetToken(validatePasswordResetTokenInput: ValidatePasswordResetTokenInput!): ValidatePasswordResetTokenEntity!
 }
 
+input PublishEventInput {
+  eventId: String!
+  userId: String!
+}
+
 type Query {
   findRoleByName(findRoleByName: FindRoleByNameInput!): RoleEntity!
+  getAmountOfDraftEvents: Int!
+  getAmountOfPublishEvents: Int!
+  getEventById(getEventByIdInput: GetEventByIdInput!): EventEntity!
   getListOfEvents: [EventEntity!]!
   getListOfEventsByRequesterId(getListOfEventsByRequesterIdInput: GetListByRequesterIdInput!): [EventEntity!]!
   getListOfEventsForThisMonth: [EventEntity!]!
@@ -147,7 +170,6 @@ type Query {
   getListOfRequestsEventsByUserId(getRequestsEventsByUserId: GetRequestsEventsByUserIdInput!): [RequestEventEntity!]!
   getRequestEventById(getRequestEventById: GetRequestEventByIdInput!): RequestEventEntity!
   listUsers: [UserEntity!]!
-  logout: LogoutEntity!
   me: MeEntity!
   retrieveUser(id: String!): UserEntity!
   rolesList: [RoleEntity!]!
@@ -215,6 +237,22 @@ enum RoleType {
 input SaveEventInput {
   eventId: String!
   userId: String!
+}
+
+input UpdateEventInput {
+  address: String
+  createdAt: String
+  description: String
+  endDate: String
+  eventId: String!
+  images: [String!]
+  locationName: String
+  principalImage: String
+  requestEventId: String
+  startDate: String
+  subtitle: String
+  tags: [String!]
+  title: String
 }
 
 input UpdateUserInput {

@@ -1,9 +1,11 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import ApiError from 'src/common/services/error';
 import { PrismaService } from '../../common/services/database/prisma.service';
 import { WhatsappService } from '../../common/services/whatsapp/ultrasmg.service';
+import { EventsService } from '../events/events.service';
 import {
+  ApproveRequestEventInput,
   CreateRequestEventInput,
   GetRequestEventByIdInput,
 } from './dto/request-event.input';
@@ -16,7 +18,9 @@ export class RequestsEventsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly eventServices: EventsService,
     private readonly whatsappService: WhatsappService,
+    private logger: Logger,
   ) {}
   async create(
     createRequestEventInput: CreateRequestEventInput,
@@ -96,25 +100,117 @@ export class RequestsEventsService {
     return requestEvent;
   }
 
-  // @OnEvent('requestEvent.created')
-  // async NotifyApprovers(payload: RequestEventCreatedEvent){
-  //   const approvers = await this.prisma.user.findMany({
-  //     where: {
-  //       roles: {
-  //         some: {
-  //           name: "REQUEST_APPROVER"
-  //         }
-  //       }
-  //     }
-  //   })
+  async approveRequestEvent({
+    requestEventId,
+    approverId,
+  }: ApproveRequestEventInput): Promise<RequestEventEntity> {
+    const requestEvent = await this.prisma.requestEvent.update({
+      where: {
+        id: requestEventId,
+      },
+      data: {
+        status: 'APPROVED',
+        approvedBy: {
+          connect: {
+            id: approverId,
+          },
+        },
+      },
+      include: {
+        approvedBy: true,
+        requestedBy: true,
+      },
+    });
 
-  //   for(const approver of approvers){
-  //     this.whatsappService.sendMessage({
-  //       to: `${approver.phone_number}`,
-  //       body: `
-  //         ${payload.user.name} ha enviado una solicitud para un Evento con titulo: ${payload.titleEvent}
-  //       `
-  //     })
-  //   }
-  // }
+    const event = await this.eventServices.create({
+      title: requestEvent.title,
+      subtitle: requestEvent.subtitle,
+      description: requestEvent.description,
+      startDate: requestEvent.startDate,
+      endDate: requestEvent.endDate,
+      locationName: requestEvent.locationName,
+      locationDetail: requestEvent.locationDetail,
+      address: requestEvent.address,
+      requestEventId: requestEvent.id,
+      principalImage: '',
+    });
+
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: event.requestEvent.requestedById,
+      },
+    });
+
+    this.eventEmitter.emit(
+      'requestEvent.accepted',
+      new RequestEventCreatedEvent(user, requestEvent.title),
+    );
+
+    return requestEvent;
+  }
+
+  async rejectRequestEvent({
+    requestEventId,
+    approverId,
+  }: ApproveRequestEventInput): Promise<RequestEventEntity> {
+    const requestEvent = this.prisma.requestEvent.update({
+      where: {
+        id: requestEventId,
+      },
+      data: {
+        status: 'REJECTED',
+        approvedBy: {
+          connect: {
+            id: approverId,
+          },
+        },
+      },
+      include: {
+        approvedBy: true,
+        requestedBy: true,
+      },
+    });
+
+    return requestEvent;
+  }
+
+  @OnEvent('requestEvent.created')
+  async NotifyApprovers(payload: RequestEventCreatedEvent) {
+    const approvers = await this.prisma.user.findMany({
+      where: {
+        roles: {
+          some: {
+            name: 'REQUEST_APPROVER',
+          },
+        },
+      },
+    });
+
+    for (const approver of approvers) {
+      try {
+        this.whatsappService.sendMessage({
+          to: `${approver.phone_number}`,
+          body: `
+            ${payload.user.name} ha enviado una solicitud para un Evento con titulo: ${payload.titleEvent}
+          `,
+        });
+      } catch (err) {
+        this.logger.error('Error Ultrasmg', err);
+      }
+    }
+  }
+
+  @OnEvent('requestEvent.accepted')
+  async NotifyRequester(payload: RequestEventCreatedEvent) {
+    try {
+      this.whatsappService.sendMessage({
+        to: `${payload.user.phone_number}`,
+        body: `
+            tu solicitud para un Evento con titulo: ${payload.titleEvent} ha sido aprobada.
+          `,
+      });
+    } catch (err) {
+      this.logger.error('Error Ultrasmg', err);
+    }
+  }
 }

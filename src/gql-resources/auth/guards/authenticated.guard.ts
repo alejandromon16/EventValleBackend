@@ -12,7 +12,6 @@ export class IsAuthenticated implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<any> {
     const ctxReq = GqlExecutionContext.create(context).getContext().req;
     const AuthenticationStatus = ctxReq.isAuthenticated();
-    console.log(AuthenticationStatus);
     if (!AuthenticationStatus) {
       throw new ApiError(`Password reset token has expired`, {
         statusCode: HttpStatus.UNAUTHORIZED,

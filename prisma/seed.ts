@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { hash } from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -13,6 +14,7 @@ async function clearDatabase() {
 
 async function main() {
   await clearDatabase();
+  const hashedPassword = await hash('12345678', 10);
 
   const superAdminRole = await prisma.role.create({
     data: {
@@ -49,7 +51,7 @@ async function main() {
       last_name: 'Montero',
       user_name: 'alm1',
       email: 'maa6000280@univalle.edu',
-      password: '12345678',
+      password: hashedPassword,
       roles: {
         connect: [{ id: superAdminRole.id }],
       },
@@ -62,7 +64,7 @@ async function main() {
       last_name: 'Arze',
       user_name: 'pablo123',
       email: 'pablo@univalle.edu',
-      password: '12345678',
+      password: hashedPassword,
       roles: {
         connect: [{ id: adminRole.id }],
       },
@@ -75,7 +77,7 @@ async function main() {
       last_name: 'Flores',
       user_name: 'Karen123',
       email: 'karen@univalle.edu',
-      password: '12345678',
+      password: hashedPassword,
       roles: {
         connect: [{ id: requestApproverRole.id }],
       },
@@ -88,7 +90,7 @@ async function main() {
       last_name: 'Paz',
       user_name: 'rodri123',
       email: 'rod@univalle.edu',
-      password: '12345678',
+      password: hashedPassword,
       roles: {
         connect: [{ id: marketingRole.id }],
       },

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { AppController } from './app.controller';
@@ -30,6 +30,6 @@ import { EventsModule } from '../gql-resources/events/events.module';
     EventsModule,
   ],
   controllers: [AppController],
-  providers: [AppService, WhatsappService],
+  providers: [AppService, WhatsappService, Logger],
 })
 export class AppModule {}
