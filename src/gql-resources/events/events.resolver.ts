@@ -4,11 +4,11 @@ import {
   CreateEventInput,
   GetEventByIdInput,
   GetListByRequesterIdInput,
-  GetListOfEventByUserIdInput,
+  GetListOfEventsSavedByUserIdInput,
   UpdateEventInput,
 } from './dto/create-event.input';
 import { LikedEventInput } from './dto/liked-event.input';
-import { PublishEventInput } from './dto/publish-event.input';
+import { PublishEventInput, UnPublishEventInput } from './dto/publish-event.input';
 import { SaveEventInput } from './dto/save-event.input';
 import { EventEntity } from './entities/event.entity';
 import { EventsService } from './events.service';
@@ -44,7 +44,7 @@ export class EventsResolver {
   }
 
   @Query(() => [EventEntity])
-  getListOfEventSavedByUserId(@Args('getListOfEventsSavedByUserIdInput')getListOfEventsSavedByUserIdInput: GetListOfEventByUserIdInput ){
+  getListOfEventsSavedByUserId(@Args('getListOfEventsSavedByUserIdInput')getListOfEventsSavedByUserIdInput: GetListOfEventsSavedByUserIdInput ){
     return this.eventsService.getListOfEventsSavedByUserId(getListOfEventsSavedByUserIdInput);
   }
 
@@ -71,8 +71,8 @@ export class EventsResolver {
   }
 
   @Mutation(() => EventEntity)
-  UnPublishEvent(@Args('publishEventInput') publishEventInput: PublishEventInput) {
-    return this.eventsService.publish(publishEventInput);
+  unPublishEvent(@Args('unPublishEventInput') unPublishEventInput: UnPublishEventInput) {
+    return this.eventsService.unPublish(unPublishEventInput);
   }
 
   @Mutation(() => EventEntity)

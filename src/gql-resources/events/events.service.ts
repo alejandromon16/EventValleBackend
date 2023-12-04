@@ -6,11 +6,14 @@ import {
   CreateEventInput,
   GetEventByIdInput,
   GetListByRequesterIdInput,
-  GetListOfEventByUserIdInput,
+  GetListOfEventsSavedByUserIdInput,
   UpdateEventInput,
 } from './dto/create-event.input';
 import { LikedEventInput } from './dto/liked-event.input';
-import { PublishEventInput } from './dto/publish-event.input';
+import {
+  PublishEventInput,
+  UnPublishEventInput,
+} from './dto/publish-event.input';
 import { SaveEventInput } from './dto/save-event.input';
 import { EventCreatedEvent } from './emitters/event-created';
 import { EventEntity } from './entities/event.entity';
@@ -71,6 +74,8 @@ export class EventsService {
       },
     });
 
+    this.logger.log(`Event publish with id ${event.id}`);
+
     this.eventEmitter.emit(
       'event.created',
       new EventCreatedEvent(
@@ -84,21 +89,18 @@ export class EventsService {
     return event;
   }
 
-  async unPublish(publishEventInput: PublishEventInput): Promise<EventEntity> {
+  async unPublish(
+    unPublishEventInput: UnPublishEventInput,
+  ): Promise<EventEntity> {
     const event = await this.prisma.event.update({
       where: {
-        id: publishEventInput.eventId,
+        id: unPublishEventInput.eventId,
       },
       include: {
         requestEvent: true,
       },
       data: {
         status: 'DRAFT',
-        publishedBy: {
-          connect: {
-            id: publishEventInput.userId,
-          },
-        },
       },
     });
 
@@ -210,31 +212,6 @@ export class EventsService {
     return events;
   }
 
-  async getListOfEventsSavedByUserId(
-    eventsSavedByUserIdInput: GetListOfEventByUserIdInput,
-  ): Promise<EventEntity[]> {
-    const events = await this.prisma.event.findMany({
-      where: {
-        savedBy: {
-          every: {
-            id: eventsSavedByUserIdInput.userId,
-          },
-        },
-      },
-      include: {
-        requestEvent: {
-          include: {
-            approvedBy: true,
-            requestedBy: true,
-          },
-        },
-        publishedBy: true,
-      },
-    });
-
-    return events;
-  }
-
   async listOfThisMonth(): Promise<EventEntity[]> {
     const today = new Date();
     const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
@@ -315,6 +292,31 @@ export class EventsService {
     return updatedEvent;
   }
 
+  async getListOfEventsSavedByUserId(
+    eventsSavedByUserIdInput: GetListOfEventsSavedByUserIdInput,
+  ): Promise<EventEntity[]> {
+    const events = await this.prisma.event.findMany({
+      where: {
+        savedBy: {
+          some: {
+            id: eventsSavedByUserIdInput.userId,
+          },
+        },
+      },
+      include: {
+        requestEvent: {
+          include: {
+            approvedBy: true,
+            requestedBy: true,
+          },
+        },
+        publishedBy: true,
+      },
+    });
+
+    return events;
+  }
+
   async saveEventByUser(saveEventInput: SaveEventInput): Promise<EventEntity> {
     const { userId, eventId } = saveEventInput;
 
@@ -337,7 +339,7 @@ export class EventsService {
       },
       data: {
         savedBy: {
-          connect: { id: userId },
+          connect: [{ id: userId }],
         },
       },
     });
@@ -350,6 +352,7 @@ export class EventsService {
   ): Promise<EventEntity> {
     const { userId, eventId } = saveEventInput;
 
+    console.log(eventId);
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -369,7 +372,7 @@ export class EventsService {
       },
       data: {
         savedBy: {
-          disconnect: { id: userId },
+          disconnect: [{ id: userId }],
         },
       },
     });

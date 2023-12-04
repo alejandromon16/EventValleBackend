@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { RequestsEventsService } from './requests-events.service';
 import { RequestsEventsResolver } from './requests-events.resolver';
 import { EmailService } from '../../common/services';
@@ -11,6 +11,7 @@ import { EventsService } from '../events/events.service';
     RequestsEventsResolver,
     EventsService,
     WhatsappService,
+    Logger,
     { provide: EmailService, useValue: new EmailService() },
   ],
   exports: [RequestsEventsService],

@@ -97,6 +97,10 @@ input GetListByRequesterIdInput {
   requesterId: String!
 }
 
+input GetListOfEventsSavedByUserIdInput {
+  userId: String!
+}
+
 input GetRequestEventByIdInput {
   requestEventId: String!
 }
@@ -129,7 +133,6 @@ type MeEntity {
 }
 
 type Mutation {
-  UnPublishEvent(publishEventInput: PublishEventInput!): EventEntity!
   addLike(likedEventInput: LikedEventInput!): EventEntity!
   approveRequestEvent(approveRequestEventInput: ApproveRequestEventInput!): RequestEventEntity!
   assignRolesToUser(assignRolesToUser: AssignRolesToUserInput!): UserEntity!
@@ -146,6 +149,7 @@ type Mutation {
   requestPasswordReset(requestPasswordResetInput: RequestPasswordResetInput!): UserEntity!
   resetPassword(resetPasswordInput: ResetPasswordInput!): UserEntity!
   saveEventByUser(saveEventInput: SaveEventInput!): EventEntity!
+  unPublishEvent(unPublishEventInput: UnPublishEventInput!): EventEntity!
   unSaveEventByUser(saveEventInput: SaveEventInput!): EventEntity!
   updateEvent(updateEventInput: UpdateEventInput!): EventEntity!
   updateUser(updateUserInput: UpdateUserInput!): UserEntity!
@@ -166,6 +170,7 @@ type Query {
   getListOfEventsByRequesterId(getListOfEventsByRequesterIdInput: GetListByRequesterIdInput!): [EventEntity!]!
   getListOfEventsForThisMonth: [EventEntity!]!
   getListOfEventsForThisWeek: [EventEntity!]!
+  getListOfEventsSavedByUserId(getListOfEventsSavedByUserIdInput: GetListOfEventsSavedByUserIdInput!): [EventEntity!]!
   getListOfRequestsEvents: [RequestEventEntity!]!
   getListOfRequestsEventsByUserId(getRequestsEventsByUserId: GetRequestsEventsByUserIdInput!): [RequestEventEntity!]!
   getRequestEventById(getRequestEventById: GetRequestEventByIdInput!): RequestEventEntity!
@@ -235,6 +240,11 @@ enum RoleType {
 }
 
 input SaveEventInput {
+  eventId: String!
+  userId: String!
+}
+
+input UnPublishEventInput {
   eventId: String!
   userId: String!
 }

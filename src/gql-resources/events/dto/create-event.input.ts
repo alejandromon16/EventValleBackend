@@ -74,7 +74,7 @@ export class UpdateEventInput extends PartialType(CreateEventInput) {
 }
 
 @InputType()
-export class GetListOfEventByUserIdInput {
+export class GetListOfEventsSavedByUserIdInput {
   @Field(() => String)
   userId: string;
 }

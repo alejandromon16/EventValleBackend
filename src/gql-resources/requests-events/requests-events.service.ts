@@ -20,7 +20,7 @@ export class RequestsEventsService {
     private readonly eventEmitter: EventEmitter2,
     private readonly eventServices: EventsService,
     private readonly whatsappService: WhatsappService,
-    private logger: Logger,
+    private readonly logger: Logger,
   ) {}
   async create(
     createRequestEventInput: CreateRequestEventInput,

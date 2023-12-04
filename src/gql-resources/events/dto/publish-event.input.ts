@@ -8,3 +8,12 @@ export class PublishEventInput {
   @Field(() => String)
   eventId: string;
 }
+
+@InputType()
+export class UnPublishEventInput {
+  @Field(() => String)
+  userId: string;
+
+  @Field(() => String)
+  eventId: string;
+}
